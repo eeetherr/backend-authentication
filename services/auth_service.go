@@ -2,13 +2,13 @@ package services
 
 import (
 	"ankit/authentication/constants"
-	"ankit/authentication/dto"
+	"ankit/authentication/dto/auth"
 	"ankit/authentication/dto/comms"
-	"ankit/authentication/dto/users"
 	"ankit/authentication/repositories"
 	"ankit/authentication/utils"
+	"encoding/json"
 	"errors"
-	"time"
+	"github.com/sirupsen/logrus"
 )
 
 type AuthService struct {
@@ -18,7 +18,7 @@ type AuthService struct {
 }
 
 // SignUp handles user registration and sends OTP
-func (s *AuthService) SignUp(req dto.SignUpRequest) error {
+func (s *AuthService) SignUp(req auth.SignUpRequest) error {
 	// Check if user already exists
 	existingUser, _ := s.UserRepo.GetUserByEmailAndPhoneNumber(req.Email, req.PhoneNumber)
 	if existingUser != nil {
@@ -28,60 +28,64 @@ func (s *AuthService) SignUp(req dto.SignUpRequest) error {
 	// Generate OTP
 	verificationCode := utils.GenerateVerificationCode(constants.VerificationCodeLength)
 
+	data := map[string]string{
+		"Name": req.Name,
+		"Code": verificationCode,
+	}
+
+	var status string
 	// Send email with OTP
-	err := s.Comms.SendEmail(req.Email, verificationCode)
+	err := s.Comms.SendEmail(req.Email, data, constants.SignUpComms)
 	if err != nil {
-		return errors.New("could not send verification email")
+		status = "FAILED"
+		logrus.Errorf("Failed to send the comms while signup")
+	} else {
+		status = "SUCCESS"
 	}
 
-	// Save user (optional: you can delay until after verification)
-	user := users.User{
-		Name:        req.Name,
-		Email:       req.Email,
-		PhoneNumber: req.PhoneNumber,
-		Password:    req.Password, // consider hashing this
-	}
-	err = s.UserRepo.CreateUser(&user)
+	additionalData, err := json.Marshal(req)
 	if err != nil {
-		return errors.New("could not create user")
+		logrus.Errorf("Unable to unmarshal the data")
+		return err
+	}
+	commsRepo := repositories.CommsRepository{}
+	commsData := &comms.CommunicationLog{
+		EventType:      constants.SignUpComms,
+		Status:         status,
+		Destination:    req.Email,
+		AdditionalData: additionalData,
+	}
+	errComms := commsRepo.SaveCommunicationLogs(commsData)
+	if errComms != nil {
+		logrus.Errorf("Unable to save comms")
+		return err
 	}
 
-	// Save OTP in comms table
-	otp := comms.CommsVerification{
-		Email:            req.Email,
-		VerificationCode: verificationCode,
-		IsUsed:           false,
-		CreatedAt:        time.Now(),
-	}
-	err = s.CommsRepo.SaveVerificationCode(otp)
-	if err != nil {
-		return errors.New("could not save OTP")
-	}
-
-	return nil
+	return err
 }
 
-// VerifyEmail handles OTP verification
-func (s *AuthService) VerifyEmail(email string, otpInput string) error {
-	record, err := s.CommsRepo.GetLatestVerificationByEmail(email)
-	if err != nil {
-		return errors.New("database error")
-	}
-	if record == nil {
-		return errors.New("no OTP found for this email")
-	}
-	if record.IsUsed {
-		return errors.New("OTP already used")
-	}
-	if record.VerificationCode != otpInput {
-		return errors.New("invalid OTP")
-	}
-
-	// Mark OTP as used
-	err = s.CommsRepo.MarkCodeAsUsed(record.ID)
-	if err != nil {
-		return errors.New("failed to update OTP status")
-	}
-
-	return nil
-}
+//
+//// VerifyEmail handles OTP verification
+//func (s *AuthService) VerifyEmail(email string, otpInput string) error {
+//	record, err := s.CommsRepo.GetLatestVerificationByEmail(email)
+//	if err != nil {
+//		return errors.New("database error")
+//	}
+//	if record == nil {
+//		return errors.New("no OTP found for this email")
+//	}
+//	if record.IsUsed {
+//		return errors.New("OTP already used")
+//	}
+//	if record.VerificationCode != otpInput {
+//		return errors.New("invalid OTP")
+//	}
+//
+//	// Mark OTP as used
+//	err = s.CommsRepo.MarkCodeAsUsed(record.ID)
+//	if err != nil {
+//		return errors.New("failed to update OTP status")
+//	}
+//
+//	return nil
+//}
