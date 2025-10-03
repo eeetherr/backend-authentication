@@ -3,9 +3,21 @@ package main
 import (
 	"ankit/authentication/constants"
 	controllers "ankit/authentication/controllers/auth_contoller"
+	"ankit/authentication/database"
+	"ankit/authentication/utils"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
+
+func init() {
+	fmt.Println("Loading configs...") // log is initialized after configs setup
+	paths := []string{constants.ConfigPath}
+	utils.SetupConfig(paths)
+
+	fmt.Println("Connecting database........")
+	database.InitDB()
+}
 
 func Routes(router *gin.Engine) {
 	auth := router.Group(constants.Auth)

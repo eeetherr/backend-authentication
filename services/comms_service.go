@@ -1,61 +1,58 @@
 package services
 
 import (
+	"ankit/authentication/constants"
 	"ankit/authentication/dto/comms"
-	"bytes"
+	"ankit/authentication/repositories"
+	"ankit/authentication/utils"
+	"encoding/json"
 	"fmt"
 	"net/smtp"
-	"text/template"
+
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 type commsService struct {
-	SMTPHost string
-	SMTPPort string
-	Username string
-	Password string
-	From     string
+	commsRepo *repositories.CommsRepository
 }
 
 //var CommsService = &commsService{}
 
 func NewCommsService() *commsService {
 	return &commsService{
-		SMTPHost: "smtp.gmail.com",
-		SMTPPort: "587",
-		Username: "yytiyiy@gmail.com",
-		Password: "your-app-password",
-		From:     "your-email@gmail.com",
+		commsRepo: repositories.NewCommsRepository(),
 	}
 } // SignUp handles user registration
-func (s *commsService) SendEmail(to string, verificationCode string) error {
 
-	//send email
-	tmpl, err := template.ParseFiles("templates/verification_email.txt")
+func (s *commsService) SendEmail(to string, data interface{}, templateName string) error {
+	commsRepo := repositories.CommsRepository{}
+	template, err := commsRepo.GetTemplateUsingName(templateName)
 	if err != nil {
-		return fmt.Errorf("failed to load email template: %w", err)
+		logrus.Errorf("error in getting templates : %v", err)
+		return err
 	}
 
-	var data = comms.EmailData{
-		Name: "User",
-		Code: "hdh",
-	} //after sending to user save into database
-
-	var body bytes.Buffer
-	err = tmpl.Execute(&body, data)
-	if err != nil {
-		return fmt.Errorf("failed to execute email template: %w", err)
+	var templateContent comms.TemplateContent
+	if err := json.Unmarshal(template.TemplateContent, &templateContent); err != nil {
+		logrus.Errorf("error while unmarshalling : %v", err)
+		return err
 	}
 
-	// Split into subject and body (optional)
-	subject := "Verify your email"
-	message := fmt.Sprintf("To: %s\nSubject: %s\n\n%s", to, subject, body.String())
+	body, err := utils.RenderTemplate(templateContent.Body, data)
+	if err != nil {
+		logrus.Errorf("error in making body of email : %v", err)
+		return err
+	}
 
-	// Send the email
-	auth := smtp.PlainAuth("", s.Username, s.Password, s.SMTPHost)
+	subject := templateContent.Subject
+	message := fmt.Sprintf("To: %s\nSubject: %s\n\n%s", to, subject, body)
+
+	auth := smtp.PlainAuth("", viper.GetString(constants.CommsUsername), viper.GetString(constants.CommsAppPassword), viper.GetString(constants.CommsHostName))
 	err = smtp.SendMail(
-		s.SMTPHost+":"+s.SMTPPort,
+		viper.GetString(constants.CommsHostName)+":"+viper.GetString(constants.CommsHostPort),
 		auth,
-		s.From,
+		viper.GetString(constants.CommsName),
 		[]string{to},
 		[]byte(message),
 	)

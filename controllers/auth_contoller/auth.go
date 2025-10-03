@@ -1,24 +1,21 @@
 package controllers
 
 import (
+	"ankit/authentication/dto/auth"
 	"net/http"
 
-	"ankit/authentication/dto"
 	"ankit/authentication/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SignUp(c *gin.Context) {
-	var req dto.SignUpRequest
+	var req auth.SignUpRequest
 
-	// 1. Bind JSON body to DTO
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
-
-	// 2. Call service layer
 	service := services.AuthService{}
 	err := service.SignUp(req)
 	if err != nil {
@@ -26,7 +23,6 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	// 3. Respond back
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User registered successfully",
 	})

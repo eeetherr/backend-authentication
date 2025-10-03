@@ -9,22 +9,16 @@ import (
 )
 
 type UserRepository struct {
-	DB *gorm.DB
 }
 
 func NewUserRepository() *UserRepository {
-	db := database.GetDB()
-	return &UserRepository{DB: db}
-}
-
-func (r *UserRepository) CreateUser(user *users.User) error {
-	result := r.DB.Create(user)
-	return result.Error
+	return &UserRepository{}
 }
 
 func (r *UserRepository) GetUserByEmailAndPhoneNumber(email, phoneNumber string) (*users.User, error) {
+	db := database.GetDB()
 	var user users.User
-	result := r.DB.Where("email = ? OR phone_number = ?", email, phoneNumber).First(&user)
+	result := db.Where("email = ? OR phone_number = ?", email, phoneNumber).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil

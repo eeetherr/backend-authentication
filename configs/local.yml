@@ -1,0 +1,11 @@
+HOST_TYPE: "local"
+
+communication:
+  sending_credentials:
+    name: "Jayant Maurya"
+    from: "jayant74242@gmail.com"
+    username: "jayant74242@gmail.com"
+    app_password: ""
+  host:
+    host_name: "smtp.gmail.com"
+    host_port: "587"
