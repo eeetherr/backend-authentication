@@ -32,11 +32,16 @@ func AuthPath(authRoute *gin.RouterGroup) {
 	r1 := authRoute.Group(constants.V1)
 	r1.POST(constants.SignUp, controllers.SignUp)
 
+	r1.POST(constants.VerifyAuth, controllers.VerifyAuth)
+
+	r1.POST(constants.Login, controllers.Login)
+
 }
 
-// func CommsPath(commsRoute *gin.RouterGroup){
-// 	r1 := commsRoute.Group(constants.V1)
-// }
+//func CommsPath(commsRoute *gin.RouterGroup) {
+//	r1 := commsRoute.Group(constants.V1)
+//	r1.POST(constants.ConfirmCode, controllers.SignUp)
+//}
 
 // func UsersPath(usersRoute *gin.RouterGroup){
 // 	r1 := usersRoute.Group(constants.V1)

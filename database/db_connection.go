@@ -31,15 +31,16 @@
 package database
 
 import (
+	"log"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 var DB = &gorm.DB{}
 
 func InitDB() {
-	dsn := "host=localhost user=jayant.m password=postgres dbname=postgres port=5432 sslmode=disable"
+	dsn := "host=localhost user=postgres password=psg dbname=authentication_user_db port=5432 sslmode=disable"
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

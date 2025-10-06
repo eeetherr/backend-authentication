@@ -4,8 +4,11 @@ communication:
   sending_credentials:
     name: "Jayant Maurya"
     from: "jayant74242@gmail.com"
-    username: "jayant74242@gmail.com"
-    app_password: ""
+    username: "ankit.2101016cs@iiitbh.ac.in"
+    app_password: "vlmcbmevaxkhwuid"
   host:
     host_name: "smtp.gmail.com"
     host_port: "587"
+
+jwt:
+  secret: "229b64d7c0887b56d95dd2e0506e7b7c"

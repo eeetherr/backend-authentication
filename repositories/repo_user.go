@@ -27,3 +27,7 @@ func (r *UserRepository) GetUserByEmailAndPhoneNumber(email, phoneNumber string)
 	}
 	return &user, nil
 }
+
+func (r *UserRepository) SaveUser(user *users.User) error {
+	return database.DB.Save(user).Error
+}
