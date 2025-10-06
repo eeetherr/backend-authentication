@@ -1,7 +1,9 @@
 package constants
 
 const (
-	SignUp = "/sign_up"
+	SignUp     = "/sign_up"
+	VerifyAuth = "/verify_auth"
+	Login      = "/login"
 )
 
 // template constants

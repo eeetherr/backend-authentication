@@ -69,14 +69,15 @@ type TemplateContent struct {
 }
 
 type CommunicationLog struct {
-	ID             int             `json:"id" gorm:"primaryKey;autoIncrement;column:id"`
-	EventType      string          `json:"event_type" gorm:"column:event_type;type:varchar(50);not null"`
-	Status         string          `json:"status" gorm:"column:status;type:varchar(50);not null"`
-	AdditionalData json.RawMessage `json:"additional_data,omitempty" gorm:"column:additional_data;type:jsonb"`
-	Destination    string          `json:"destination" gorm:"column:destination;type:varchar(50);not null"`
-	CreatedAt      *time.Time      `json:"created_at,omitempty" gorm:"column:created_at"`
-	UpdatedAt      *time.Time      `json:"updated_at,omitempty" gorm:"column:updated_at"`
-	DeletedAt      *time.Time      `json:"deleted_at,omitempty" gorm:"column:deleted_at"`
+	ID               int             `json:"id" gorm:"primaryKey;autoIncrement;column:id"`
+	EventType        string          `json:"event_type" gorm:"column:event_type;type:varchar(50);not null"`
+	Status           string          `json:"status" gorm:"column:status;type:varchar(50);not null"`
+	AdditionalData   json.RawMessage `json:"additional_data,omitempty" gorm:"column:additional_data;type:jsonb"`
+	Destination      string          `json:"destination" gorm:"column:destination;type:varchar(50);not null"`
+	CreatedAt        *time.Time      `json:"created_at,omitempty" gorm:"column:created_at"`
+	UpdatedAt        *time.Time      `json:"updated_at,omitempty" gorm:"column:updated_at"`
+	DeletedAt        *time.Time      `json:"deleted_at,omitempty" gorm:"column:deleted_at"`
+	VerificationCode string          `json:"verification_code" gorm:"column:verification_code;type:varchar(50);not null"`
 }
 
 // TableName overrides default GORM table name

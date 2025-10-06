@@ -14,16 +14,7 @@ import (
 )
 
 type commsService struct {
-	commsRepo *repositories.CommsRepository
 }
-
-//var CommsService = &commsService{}
-
-func NewCommsService() *commsService {
-	return &commsService{
-		commsRepo: repositories.NewCommsRepository(),
-	}
-} // SignUp handles user registration
 
 func (s *commsService) SendEmail(to string, data interface{}, templateName string) error {
 	commsRepo := repositories.CommsRepository{}
